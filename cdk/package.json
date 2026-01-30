@@ -1,0 +1,10 @@
+{
+  "name": "aws-deploy-cdk",
+  "version": "1.0.0",
+  "description": "AWS CDK を使用してインフラをコードで管理し、GitHub Actions を使い、AWSへ手動デプロイを行います。",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
