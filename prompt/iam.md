@@ -7,7 +7,7 @@ github に push後、Github Actions から手動で　AWSの各アカウント�
   ./Credentials.md を確認してください。
 
 - ワークフローファイル
-  以下の２つのファイルjに構成してください。
+  以下の２つのファイルに構成してください。
   .github/workflows/iam.yml
   ./cdk/lib/iam-stack.ts
 
