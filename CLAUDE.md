@@ -1,3 +1,17 @@
+# AWS アカウント情報
+
+dev: ./config/dev.json
+stg: ./config/stg.json
+prod: ./config/prod.json
+
+# AWS デプロイに必要な認証情報
+
+GitHub の Environments（dev, stg, prod）に以下の情報を設定済です。
+
+AWS_ACCESS_KEY_ID: XXX
+AWS_SECRET_ACCESS_KEY: XXX
+S3_BUCKET: XXX
+
 # Lambda 関数のアップロード方法
 
 GitHub へ push 後、GitHubActions を利用し dev, stg, prod に設定する。
