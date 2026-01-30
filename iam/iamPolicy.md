@@ -2,11 +2,14 @@
 
 IAMポリシーの設定内容を記載してします。
 
-# 設定内容
+# 名前
 
 ポリシー名: AgileWorks-app4_Administer
 説明: AWMobileApp Expo
 タイプ: カスタマー管理
+命名規則: dev, stg, prod とも共通
+
+# 許可
 
 "Effect": "Allow",
 
@@ -35,3 +38,7 @@ IAMポリシーの設定内容を記載してします。
 "arn:aws:dynamodb:ap-northeast-1:370632987723:table/license_info2/*",
 "arn:aws:dynamodb:ap-northeast-1:370632987723:table/customer_license/*"
 ]
+
+# タグ
+
+ManagedBy: CDK
