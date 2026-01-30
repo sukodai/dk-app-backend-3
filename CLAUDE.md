@@ -1,3 +1,7 @@
+# AWSのデプロイ方法
+
+GitHub に push後、GitHub Actions から手動で　AWSの各アカウント（dev, stg, prod）にデプロイします。
+
 # AWS アカウント情報
 
 dev: ./config/dev.json
