@@ -1,6 +1,8 @@
 # AWSのデプロイ方法
 
-GitHub に push後、GitHub Actions から手動で　AWSの各アカウント（dev, stg, prod）にデプロイします。
+GitHub に push後、GitHub Actions から手動トリガーで　AWSの各アカウント（dev, stg, prod）にデプロイします。
+AWS デプロイに必要な認証情報は、GitHub の Environments（dev, stg, prod）に設定済みです。
+OIDC認証は使いません。
 
 # AWS アカウント情報
 
@@ -8,13 +10,18 @@ dev: ./config/dev.json
 stg: ./config/stg.json
 prod: ./config/prod.json
 
-# AWS デプロイに必要な認証情報
+# GitHub Settings
 
-GitHub の Environments（dev, stg, prod）に以下の情報を設定済です。
+- General
+  githubOrg: dkochi
+  githubRepo: dk-app-backend-3
+  visibility: public
+  About: AWS DeployTools by CDK ver3
 
-AWS_ACCESS_KEY_ID: XXX
-AWS_SECRET_ACCESS_KEY: XXX
-S3_BUCKET: XXX
+- Environments（dev, stg, prod）
+  AWS_ACCESS_KEY_ID: XXX
+  AWS_SECRET_ACCESS_KEY: XXX
+  S3_BUCKET: XXX
 
 # Lambda 関数のアップロード方法
 
