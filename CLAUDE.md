@@ -1,3 +1,7 @@
+# 基本情報
+
+projectName: AWMobileApp4
+
 # AWSのデプロイ方法
 
 GitHub に push後、GitHub Actions から手動トリガーで　AWSの各アカウント（dev, stg, prod）にデプロイします。
