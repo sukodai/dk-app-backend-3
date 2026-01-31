@@ -11,7 +11,9 @@ const envName = app.node.tryGetContext("env") || "dev";
 const configPath = path.resolve(__dirname, `../../config/${envName}.json`);
 const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
 
-new IamStack(app, `IamStack-${config.envName}`, {
+const projectName = "AWMobileApp4";
+
+const iamStack = new IamStack(app, `${projectName}-IamStack-${config.envName}`, {
   env: {
     account: config.account,
     region: config.region,
@@ -19,3 +21,4 @@ new IamStack(app, `IamStack-${config.envName}`, {
   envName: config.envName,
   accountId: config.account,
 });
+cdk.Tags.of(iamStack).add("ManagedBy", "CDK");
