@@ -12,3 +12,8 @@ IAM ポリシー、IAMロールを設定するコードを書いてもらえま�
 
 - IAMロールの設定
   /iam/iamRole.md に記載しています。
+
+- CloudFormationの設定
+  スタック名: {projectName}-IamStack-{env}
+  説明: AWMobileApp Expo
+  Tag: ManagedBy: CDK
