@@ -1,1 +1,116 @@
 name: Deploy Lambda PushNotification
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "デプロイ先の環境"
+        required: true
+        type: choice
+        options:
+          - dev
+          - stg
+          - prod
+
+jobs:
+  # Job 1: dev S3 から JAR をダウンロード
+  download-jar:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Configure AWS credentials (dev)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Download JAR from dev S3
+        run: |
+          aws s3 cp s3://${{ secrets.S3_BUCKET }}/lambda-jar/aw_lambda-pushNotification-all.jar ./aw_lambda-pushNotification-all.jar
+
+      - name: Upload JAR as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-jar
+          path: ./aw_lambda-pushNotification-all.jar
+          retention-days: 1
+
+  # Job 2: ターゲット環境に JAR をアップロードし Lambda を更新
+  deploy-lambda:
+    runs-on: ubuntu-latest
+    needs: download-jar
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read account ID from config
+        id: config
+        run: |
+          ACCOUNT_ID=$(jq -r '.account' config/${{ github.event.inputs.environment }}.json)
+          echo "account_id=$ACCOUNT_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-jar
+
+      - name: Configure AWS credentials (target)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Upload JAR to target S3
+        run: |
+          aws s3 cp ./aw_lambda-pushNotification-all.jar s3://${{ secrets.S3_BUCKET }}/lambda-jar/aw_lambda-pushNotification-all.jar
+
+      - name: Check if Lambda function exists
+        id: check_function
+        run: |
+          if aws lambda get-function --function-name AWS_AgileWorks-app_PushNotification4 > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Lambda function (new)
+        if: steps.check_function.outputs.exists == 'false'
+        run: |
+          aws lambda create-function \
+            --function-name AWS_AgileWorks-app_PushNotification4 \
+            --runtime java17 \
+            --architectures x86_64 \
+            --handler jp.atled.cloud.lambda.mobileapp.PushNotificationHandler::handleRequest \
+            --role arn:aws:iam::${{ steps.config.outputs.account_id }}:role/AWS_AgileWorks-app4 \
+            --code S3Bucket=${{ secrets.S3_BUCKET }},S3Key=lambda-jar/aw_lambda-pushNotification-all.jar \
+            --environment "Variables={PrivateKey=/AgileWorks-app/Firebase/PrivateKey2,ProjectId=agileworks-app2}"
+
+      - name: Update Lambda function code (existing)
+        if: steps.check_function.outputs.exists == 'true'
+        run: |
+          aws lambda update-function-code \
+            --function-name AWS_AgileWorks-app_PushNotification4 \
+            --s3-bucket ${{ secrets.S3_BUCKET }} \
+            --s3-key lambda-jar/aw_lambda-pushNotification-all.jar
+
+      - name: Wait for Lambda update to complete
+        if: steps.check_function.outputs.exists == 'true'
+        run: |
+          aws lambda wait function-updated \
+            --function-name AWS_AgileWorks-app_PushNotification4
+
+      - name: Update Lambda function configuration (existing)
+        if: steps.check_function.outputs.exists == 'true'
+        run: |
+          aws lambda update-function-configuration \
+            --function-name AWS_AgileWorks-app_PushNotification4 \
+            --runtime java17 \
+            --architectures x86_64 \
+            --handler jp.atled.cloud.lambda.mobileapp.PushNotificationHandler::handleRequest \
+            --role arn:aws:iam::${{ steps.config.outputs.account_id }}:role/AWS_AgileWorks-app4 \
+            --environment "Variables={PrivateKey=/AgileWorks-app/Firebase/PrivateKey2,ProjectId=agileworks-app2}"
