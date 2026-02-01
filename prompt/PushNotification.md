@@ -5,7 +5,7 @@ Lambda関数をAWSにデプロイするコードを書くことはできます�
 
 - ワークフローファイル
   以下のファイルの構成してください。
-  /.github/workflows/PushNotification.yml
+  /.github/workflows/pushNotification.yml
 
 - Lambda関数の設定
   /lambda/PushNotification.md に記載してします。
