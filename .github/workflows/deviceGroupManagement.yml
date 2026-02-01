@@ -69,7 +69,29 @@ jobs:
         run: |
           aws s3 cp ./aw_lambda-deviceGroupManagement-all.jar s3://${{ secrets.S3_BUCKET }}/lambda-jar/aw_lambda-deviceGroupManagement-all.jar
 
-      - name: Update Lambda function code
+      - name: Check if Lambda function exists
+        id: check_function
+        run: |
+          if aws lambda get-function --function-name AWS_AgileWorks-app_DeviceGroupManagement4 > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Lambda function (new)
+        if: steps.check_function.outputs.exists == 'false'
+        run: |
+          aws lambda create-function \
+            --function-name AWS_AgileWorks-app_DeviceGroupManagement4 \
+            --runtime java17 \
+            --architectures x86_64 \
+            --handler jp.atled.cloud.lambda.mobileapp.DeviceGroupManagementHandler::handleRequest \
+            --role arn:aws:iam::${{ steps.config.outputs.account_id }}:role/AWS_AgileWorks-app4 \
+            --code S3Bucket=${{ secrets.S3_BUCKET }},S3Key=lambda-jar/aw_lambda-deviceGroupManagement-all.jar \
+            --environment "Variables={SenderId=8632347779,AccessToken=/AgileWorks-app/Firebase/AccessToken2,NotificationEndpoint=https://fcm.googleapis.com/fcm/notification}"
+
+      - name: Update Lambda function code (existing)
+        if: steps.check_function.outputs.exists == 'true'
         run: |
           aws lambda update-function-code \
             --function-name AWS_AgileWorks-app_DeviceGroupManagement4 \
@@ -77,11 +99,13 @@ jobs:
             --s3-key lambda-jar/aw_lambda-deviceGroupManagement-all.jar
 
       - name: Wait for Lambda update to complete
+        if: steps.check_function.outputs.exists == 'true'
         run: |
           aws lambda wait function-updated \
             --function-name AWS_AgileWorks-app_DeviceGroupManagement4
 
-      - name: Update Lambda function configuration
+      - name: Update Lambda function configuration (existing)
+        if: steps.check_function.outputs.exists == 'true'
         run: |
           aws lambda update-function-configuration \
             --function-name AWS_AgileWorks-app_DeviceGroupManagement4 \
