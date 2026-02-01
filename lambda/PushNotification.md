@@ -4,7 +4,7 @@ Lambda関数の設定内容を記載してします。
 
 # Lambda関数
 
-名前: AWS_AgileWorks-app_PushNotification3
+名前: AWS_AgileWorks-app_PushNotification4
 命名規則: dev, stg, prod とも共通
 
 # コード
@@ -24,7 +24,7 @@ API Gateway: AgileWorks-app-API
 
 # アクセス制限
 
-実行ロール: AWS_AgileWorks-app3
+実行ロール: AWS_AgileWorks-app4
 
 # 環境変数
 
