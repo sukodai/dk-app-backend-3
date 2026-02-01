@@ -9,7 +9,7 @@ Lambda関数の設定内容を記載してします。
 
 # コード
 
-S3バケット名（GitHub Secretsに設定）: dk-mobileapp
+S3バケット名: GitHub Environments に設定
 コードソース: s3://dk-mobileapp/lambda-jar/aw_lambda-pushNotification-all.jar
 
 # ランタイム設定
