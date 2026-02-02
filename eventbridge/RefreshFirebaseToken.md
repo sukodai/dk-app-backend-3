@@ -1,6 +1,6 @@
 # Overview
 
-EventBride の設定内容を記載しています。
+EventBride に設定するルールを記載しています。
 
 # ルールの詳細
 
