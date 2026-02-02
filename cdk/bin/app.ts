@@ -4,6 +4,7 @@ import * as cdk from "aws-cdk-lib";
 import * as fs from "fs";
 import * as path from "path";
 import { IamStack } from "../lib/iam-stack";
+import { EventBridgeStack } from "../lib/eventbridge-stack";
 
 const app = new cdk.App();
 
@@ -22,3 +23,13 @@ const iamStack = new IamStack(app, `${projectName}-IamStack-${config.envName}`, 
   accountId: config.account,
 });
 cdk.Tags.of(iamStack).add("ManagedBy", "CDK");
+
+const eventBridgeStack = new EventBridgeStack(app, `${projectName}-EventBridgeStack-${config.envName}`, {
+  env: {
+    account: config.account,
+    region: config.region,
+  },
+  envName: config.envName,
+  accountId: config.account,
+});
+cdk.Tags.of(eventBridgeStack).add("ManagedBy", "CDK");
