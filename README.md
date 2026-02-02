@@ -31,3 +31,7 @@ Prompt にある md を　実行するように　claude に指示してくだ�
 ### 5 eventBridge.yml
 
 `/prompt/EB_RefreshFirebaseToken.md の内容を実行してもらえないでしょうか？`
+
+### 6 apiGateway.yml
+
+`/prompt/ApiGateway.md の内容を実行してもらえないでしょうか？`
