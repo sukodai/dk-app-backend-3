@@ -1,1 +1,70 @@
 name: Deploy API Gateway Resources
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "デプロイ先の環境"
+        required: true
+        type: choice
+        options:
+          - dev
+          - stg
+          - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: cdk
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Check Lambda functions exist
+        run: |
+          aws lambda get-function --function-name AWS_AgileWorks-app_DeviceGroupManagement4 > /dev/null 2>&1 || {
+            echo "::error::Lambda function AWS_AgileWorks-app_DeviceGroupManagement4 が存在しません。先に deviceGroupManagement.yml でデプロイしてください。"
+            exit 1
+          }
+          aws lambda get-function --function-name AWS_AgileWorks-app_PushNotification4 > /dev/null 2>&1 || {
+            echo "::error::Lambda function AWS_AgileWorks-app_PushNotification4 が存在しません。先に pushNotification.yml でデプロイしてください。"
+            exit 1
+          }
+
+      - name: Get API Gateway REST API ID
+        id: get-api
+        run: |
+          API_INFO=$(aws apigateway get-rest-apis --query "items[?name=='AgileWorks-app-API']" --output json)
+          REST_API_ID=$(echo "$API_INFO" | jq -r '.[0].id')
+          if [ "$REST_API_ID" = "null" ] || [ -z "$REST_API_ID" ]; then
+            echo "::error::API Gateway 'AgileWorks-app-API' が見つかりません。"
+            exit 1
+          fi
+          ROOT_RESOURCE_ID=$(aws apigateway get-resources --rest-api-id "$REST_API_ID" --query "items[?path=='/'].id" --output text)
+          echo "rest_api_id=$REST_API_ID" >> "$GITHUB_OUTPUT"
+          echo "root_resource_id=$ROOT_RESOURCE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: CDK Bootstrap
+        working-directory: cdk
+        run: npx cdk bootstrap --context env=${{ github.event.inputs.environment }}
+
+      - name: CDK Deploy API Gateway Stack
+        working-directory: cdk
+        run: npx cdk deploy AWMobileApp4-ApiGatewayStack-${{ github.event.inputs.environment }} --context env=${{ github.event.inputs.environment }} --context restApiId=${{ steps.get-api.outputs.rest_api_id }} --context rootResourceId=${{ steps.get-api.outputs.root_resource_id }} --require-approval never
