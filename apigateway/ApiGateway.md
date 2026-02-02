@@ -9,13 +9,13 @@
 # 追加リソース1
 
 - リソース
+  メソッド: POST
   パス: /
   リソース名: AWS_AgileWorks-app_DeviceGroupManagement4
-  メソッド: POST
 
 - 総合リクエスト
-  Lambda プロキシ統合: false
   Lambda関数: AWS_AgileWorks-app_DeviceGroupManagement4
+  Lambda プロキシ統合: false
 
 - メソッドリクエスト
   認可: NONE
@@ -31,13 +31,13 @@
 # 追加リソース2
 
 - リソース
+  メソッド: POST
   パス: /
   リソース名: AWS_AgileWorks-app_PushNotification4
-  メソッド: POST
 
 - 総合リクエスト
-  Lambda プロキシ統合: false
   Lambda関数: AWS_AgileWorks-app_PushNotification4
+  Lambda プロキシ統合: false
 
 - メソッドリクエスト
   追加りソース1と同じ設定にしてください。
