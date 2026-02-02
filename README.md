@@ -27,3 +27,7 @@ Prompt にある md を　実行するように　claude に指示してくだ�
 ### 4 refreshFirebaseToken.yml
 
 `/prompt/RefreshFirebaseToken.md の内容を実行してもらえないでしょうか？`
+
+### 5 eventBridge.yml
+
+`/prompt/EB_RefreshFirebaseToken.md の内容を実行してもらえないでしょうか？`
