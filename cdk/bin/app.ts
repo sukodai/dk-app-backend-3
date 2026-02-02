@@ -5,6 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { IamStack } from "../lib/iam-stack";
 import { EventBridgeStack } from "../lib/eventbridge-stack";
+import { ApiGatewayStack } from "../lib/apigateway-stack";
 
 const app = new cdk.App();
 
@@ -33,3 +34,18 @@ const eventBridgeStack = new EventBridgeStack(app, `${projectName}-EventBridgeSt
   accountId: config.account,
 });
 cdk.Tags.of(eventBridgeStack).add("ManagedBy", "CDK");
+
+const restApiId = app.node.tryGetContext("restApiId") || "";
+const rootResourceId = app.node.tryGetContext("rootResourceId") || "";
+
+const apiGatewayStack = new ApiGatewayStack(app, `${projectName}-ApiGatewayStack-${config.envName}`, {
+  env: {
+    account: config.account,
+    region: config.region,
+  },
+  envName: config.envName,
+  accountId: config.account,
+  restApiId,
+  rootResourceId,
+});
+cdk.Tags.of(apiGatewayStack).add("ManagedBy", "CDK");
